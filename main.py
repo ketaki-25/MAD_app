@@ -1,8 +1,6 @@
 from flask import Flask, render_template,request,redirect,url_for,session,flash
-from controller.database import db
+from datetime import timedelta
 from controller.model import *
-from datetime import datetime,date
-from sqlalchemy.orm import joinedload
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -25,11 +23,7 @@ def registration():
         contact = form.get('contact')
         age = form.get('age')
         gender = form.get('gender')
-
-        # Role is fixed as patient (HTML also sends hidden input)
         role = "patient"
-
-        # Check if username or email already exists
         existing_user = User.query.filter(
             (User.username == username) | (User.email == email)
         ).first()
@@ -40,7 +34,6 @@ def registration():
                 error_message="This account already exists. Please log in."
             )
 
-        # Create User entry
         new_user = User(
             username=username,
             email=email,
@@ -53,7 +46,6 @@ def registration():
         db.session.add(new_user)
         db.session.commit()
 
-        # Create Patient Profile
         patient_profile = Patient(user_id=new_user.id)
         db.session.add(patient_profile)
         db.session.commit()
@@ -68,24 +60,18 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Find user
         user = User.query.filter_by(username=username, password=password).first()
-
         if not user:
             return render_template('login.html', 
                                    error_message="Invalid username or password.")
-
-        # Blacklist check (only applies to doctor role)
         if user.role == "doctor" and user.doctor_profile and user.doctor_profile.blacklisted:
             return render_template('login.html',
                                    error_message="Access Denied: You are blacklisted.")
 
-        # Store login session
         session['username'] = user.username
         session['user_id'] = user.id        
         session['role'] = user.role
 
-        # Redirect based on role
         if user.role == 'patient':
             return redirect(url_for('patient'))
         elif user.role == 'doctor':
@@ -101,7 +87,6 @@ def admin():
     if session.get("role") != "admin":
         return redirect(url_for("login"))
 
-    # Count all non-blacklisted doctors
     total_doctors = (
         db.session.query(Doctor)
         .join(User, Doctor.user_id == User.id)
@@ -109,23 +94,18 @@ def admin():
         .count()
     )
 
-    # Count patients
     total_patients = User.query.filter_by(role="patient").count()
 
-    # Count total appointments
     total_appointments = Appointment.query.count()
 
-    # List of all non-blacklisted doctors
     registered_doctors = Doctor.query.filter_by(blacklisted=False).all()
 
-    # List of all patients + their user info
     registered_patients = (
         db.session.query(Patient, User)
         .join(User, Patient.user_id == User.id)
         .all()
     )
 
-    # Upcoming appointments with doctor, patient & user info
     upcoming_appointments = (
         db.session.query(Appointment, Doctor, Patient, User, Department)
         .join(Doctor, Appointment.doctor_id == Doctor.id)
@@ -170,12 +150,10 @@ def edit_doctor(doctor_id):
 
 @app.route('/admin/delete_doctor/<int:doctor_id>', methods=['POST', 'GET'])
 def delete_doctor(doctor_id):
-    doctor = Doctor.query.get_or_404(doctor_id)
 
-    # Get the linked user (correct relationship usage)
+    doctor = Doctor.query.get_or_404(doctor_id)
     user = doctor.user
 
-    # Delete ONLY the user — doctor will be deleted automatically
     db.session.delete(user)
     db.session.commit()
 
@@ -190,12 +168,9 @@ def blacklist_doctor(doctor_id):
         return redirect(url_for("login"))
 
     doctor = Doctor.query.get_or_404(doctor_id)
-
-    # Toggle blacklist state
     doctor.blacklisted = not doctor.blacklisted  
     db.session.commit()
 
-    # Flash message
     if doctor.blacklisted:
         flash(f"Doctor '{doctor.user.username}' is now BLACKLISTED!", "danger")
     else:
@@ -216,34 +191,32 @@ def create_doctor():
         contact = request.form.get('contact')
         department_id = request.form.get('department_id')
 
-        # Check if email already exists
         existing = User.query.filter_by(email=email).first()
         if existing:
-            flash("A doctor already exists with this email!", "error")
+            flash("A doctor already exists with this email", "error")
             return redirect(url_for('create_doctor'))
 
-        # Fetch selected department
         department = Department.query.get(department_id)
         if not department:
-            flash("Invalid department selected!", "error")
+            flash("Invalid department selected", "error")
             return redirect(url_for('create_doctor'))
 
-        # Create user entry
+        # Create new doctor user entry
         new_user = User(
             username=username,
             email=email,
-            password="temp123",    # Temporary password
+            password="temp123",
             role="doctor",
             contact=contact
         )
         db.session.add(new_user)
         db.session.commit()
 
-        # Create doctor profile entry
+        # Create new doctor profile entry
         new_doctor = Doctor(
             user_id=new_user.id,
             department_id=department_id,
-            specialization=department.name   # ✔ Store department NAME here
+            specialization=department.name
         )
         db.session.add(new_doctor)
         db.session.commit()
@@ -251,11 +224,8 @@ def create_doctor():
         flash("Doctor created successfully!", "success")
         return redirect(url_for('create_doctor'))
 
-    # Fetch departments for dropdown
     departments = Department.query.all()
-
     return render_template('create_doctor.html', departments=departments)
-
 
 @app.route('/admin/admin_search', methods=['GET', 'POST'])
 def admin_search():
@@ -266,9 +236,8 @@ def admin_search():
     results = []
 
     if request.method == "POST":
-        query = request.form.get("search_input", "").strip()
 
-        # Search by username or email
+        query = request.form.get("search_input", "").strip()
         user_results = User.query.filter(
             (User.username.ilike(f"%{query}%")) |
             (User.email.ilike(f"%{query}%"))
@@ -276,8 +245,6 @@ def admin_search():
 
         results = []
         for user in user_results:
-
-            # If the user is a doctor and blacklisted → skip
             if user.role == "doctor" and user.doctor_profile:
                 if user.doctor_profile.blacklisted:
                     continue
@@ -292,11 +259,10 @@ def admin_search():
 
 @app.route('/doctor')
 def doctor():
-    # Ensure doctor is logged in
+
     if session.get("role") != "doctor":
         return redirect(url_for("login"))
 
-    # Get doctor record
     user_id = session.get("user_id")
     doctor = Doctor.query.filter_by(user_id=user_id).first()
 
@@ -306,30 +272,32 @@ def doctor():
 
     today = datetime.now().strftime("%Y-%m-%d")
 
-    # -------- 1. Today's Appointments --------
-    today_appointments = (
+    upcoming_appointments = (
         db.session.query(Appointment, Patient, User)
         .join(Patient, Appointment.patient_id == Patient.id)
         .join(User, Patient.user_id == User.id)
         .filter(
             Appointment.doctor_id == doctor.id,
-            Appointment.date == today
+            Appointment.date >= today
         )
+        .order_by(Appointment.date, Appointment.time)
         .all()
     )
 
-    # Convert raw rows into a clean list for Jinja
-    today_schedule = []
-    for appt, patient, user in today_appointments:
-        today_schedule.append({
-            "patient_name": user.username,
-            "time": appt.time,
-            "patient_history": patient.patient_history,
-            "appointment_id": appt.id,
-            "status": appt.status
-        })
+    upcoming_schedule = []
+    for appt, patient, user in upcoming_appointments:
+        upcoming_schedule.append(
+            {
+                "patient_name": user.username,
+                "patient_id": patient.id,
+                "date": appt.date,
+                "time": appt.time,
+                "patient_history": patient.patient_history,
+                "appointment_id": appt.id,
+                "status": appt.status
+            }
+        )
 
-    # -------- 2. Assigned Patients --------
     active_patients = (
         db.session.query(Patient, User)
         .join(User, Patient.user_id == User.id)
@@ -348,15 +316,12 @@ def doctor():
             "history": patient.patient_history
         })
 
-    # -------- Render the dashboard --------
     return render_template(
         "doctor.html",
-        today_schedule=today_schedule,
+        today_schedule=upcoming_schedule,
         assigned_patients=assigned_patients,
         doctor=doctor.user
     )
-
-from datetime import datetime, timedelta
 
 @app.route('/doctor_availability', methods=['GET', 'POST'])
 def doctor_availability():
@@ -371,43 +336,34 @@ def doctor_availability():
         dates=dates
     )
 
-
 @app.route("/set_availability", methods=["POST"])
 def set_availability():
-    # Check login & role
+
     if "user_id" not in session or session.get("role") != "doctor":
         return redirect(url_for("login"))
 
-    # Correct doctor_id
     user_id = session["user_id"]
     doctor = Doctor.query.filter_by(user_id=user_id).first()
     if not doctor:
         return redirect(url_for("login"))
     
     doctor_id = doctor.id
+    selected = request.form.getlist("availability")
 
-    # Get selected slots
-    # Note: Template should use name="availability"
-    selected = request.form.getlist("availability")   
+    Doctor_availability.query.filter_by(doctor_id=doctor_id).delete()
 
-    # Delete old availability first
-    DoctorAvailability.query.filter_by(doctor_id=doctor_id).delete()
-
-    # Time slot mapping
     slot_map = {
         "1": "08:00 - 12:00",
         "2": "12:00 - 16:00",
         "3": "16:00 - 20:00",
         "4": "20:00 - 00:00"
     }
-
-    # Insert new selections
     for slot in selected:
         if "_" in slot:
             date, slot_key = slot.split("_", 1)
             time_slot = slot_map.get(slot_key, slot_key) # Fallback to key if not found
             
-            new_entry = DoctorAvailability(
+            new_entry = Doctor_availability(
                 doctor_id=doctor_id,
                 date=date,
                 time_slot=time_slot,
@@ -419,36 +375,87 @@ def set_availability():
 
     return redirect(url_for("doctor"))
 
+
+@app.route('/doctor/complete_appointment/<int:appointment_id>')
+def complete_appointment(appointment_id):
+    if 'user_id' not in session or session.get('role') != 'doctor':
+        return redirect(url_for('login'))
+
+    appt = Appointment.query.get_or_404(appointment_id)
+
+    doctor = Doctor.query.filter_by(user_id=session['user_id']).first()
+    if appt.doctor_id != doctor.id:
+        flash("Unauthorized action.", "error")
+        return redirect(url_for('doctor'))
+
+    appt.status = "Completed"
+    db.session.commit()
+    flash("Appointment marked as completed.", "success")
+    return redirect(url_for('doctor'))
+
+
+@app.route('/doctor/cancel_appointment/<int:appointment_id>')
+def cancel_appointment_doctor(appointment_id):
+    if 'user_id' not in session or session.get('role') != 'doctor':
+        return redirect(url_for('login'))
+
+    appt = Appointment.query.get_or_404(appointment_id)
+    doctor = Doctor.query.filter_by(user_id=session['user_id']).first()
+    if appt.doctor_id != doctor.id:
+        flash("Unauthorized action.", "error")
+        return redirect(url_for('doctor'))
+
+    appt.status = "Cancelled"
+    db.session.commit()
+    flash("Appointment cancelled.", "success")
+    return redirect(url_for('doctor'))
+
+@app.route('/doctor/view_history/<int:patient_id>')
+def view_history(patient_id):
+    if 'user_id' not in session or session.get('role') != 'doctor':
+        return redirect(url_for('login'))
+
+    patient = Patient.query.get_or_404(patient_id)
+    patient_user = User.query.get(patient.user_id)
+    
+    history_records = PatientHistory.query.filter_by(patient_id=patient_id).order_by(PatientHistory.date.desc()).all()
+    
+    enriched_history = []
+    for record in history_records:
+        doctor_user = User.query.get(record.created_by)
+        enriched_history.append({
+            "date": record.date.strftime('%Y-%m-%d'),
+            "visit_type": record.visit_type,
+            "diagnosis": record.diagnosis,
+            "doctor_name": doctor_user.username if doctor_user else "Unknown"
+        })
+
+    patient_data = {
+        "name": patient_user.username,
+        "age": patient_user.age,
+        "gender": patient_user.gender,
+        "contact": patient_user.contact
+    }
+
+    return render_template("view_patient_history.html", patient=patient_data, history=enriched_history)
+
+
 @app.route('/update_history/<int:patient_id>', methods=['GET', 'POST'])
-def update_history(patient_id):
+def update_patient_history(patient_id):
 
-
+  
     if 'user_id' not in session or session.get('role') != 'doctor':
         return redirect(url_for('login'))
 
 
-    patient_details = db.session.execute(
-        text("""
-            SELECT 
-                p.patient_id,
-                p.patient_name,
-                d.doctor_name,
-                d.department
-            FROM patients p
-            JOIN doctors d ON p.doctor_id = d.doctor_id
-            WHERE p.patient_id = :pid
-        """), {"pid": patient_id}
-    ).fetchone()
-
-    if not patient_details:
-        return "Patient not found", 404
+    # Fetch patient securely using ORM
+    patient = Patient.query.get_or_404(patient_id)
 
     # If POST → Save patient history
     if request.method == "POST":
 
         visit_type = request.form.get("visitType")
         diagnosis = request.form.get("diagnosis")
-        prescription = request.form.get("prescription") # Added prescription
 
         # Only saving visit type + diagnosis
         new_history = PatientHistory(
@@ -458,20 +465,10 @@ def update_history(patient_id):
             created_by = session["user_id"]
         )
         db.session.add(new_history)
-
-        # Also mark appointment as completed if linked (logic simplified here, ideally we know which appointment)
-        # For now, let's just save history.
-
         db.session.commit()
+        return redirect(url_for("doctor"))
 
-        return redirect(url_for("doctor"))  # Back to doctor dashboard
-
-    # If GET → Show page
-    # We need to fetch patient object to get name etc.
-    patient = Patient.query.get_or_404(patient_id)
     patient_user = User.query.get(patient.user_id)
-
-    # Get current doctor details
     doctor_user = User.query.get(session['user_id'])
     doctor_profile = Doctor.query.filter_by(user_id=session['user_id']).first()
     department = Department.query.get(doctor_profile.department_id) if doctor_profile and doctor_profile.department_id else None
@@ -485,6 +482,7 @@ def update_history(patient_id):
 
     return render_template("update_patient_history.html", patient_details=patient_details)
 
+
 @app.route('/patient/dashboard')
 def patient():
     user_id = session.get('user_id')
@@ -492,17 +490,13 @@ def patient():
     if not user_id:
         return redirect('/login')
 
-    # Correct field name
     user = User.query.filter_by(id=user_id).first()
 
     if not user:
         return redirect('/login')
-
-    # Access restriction
     if user.role != "patient":
         return "Access denied. Only patients can access this page.", 403
 
-    # Patient profile lookup
     patient = Patient.query.filter_by(user_id=user_id).first()
 
     if not patient:
@@ -560,11 +554,9 @@ def book_appointment(doctor_id):
     if 'user_id' not in session or session.get('role') != 'patient':
         return redirect(url_for('login'))
 
-    doctor = Doctor.query.get_or_404(doctor_id)
+    doctor = Doctor.query.get(doctor_id)
     doctor_user = User.query.get(doctor.user_id)
-    
-  
-    availabilities = DoctorAvailability.query.filter_by(doctor_id=doctor_id, is_available=True).all()
+    availabilities = Doctor_availability.query.filter_by(doctor_id=doctor_id, is_available=True).all()
 
     if request.method == 'POST':
         date_time = request.form.get('date_time') 
@@ -576,12 +568,12 @@ def book_appointment(doctor_id):
         
         patient = Patient.query.filter_by(user_id=session['user_id']).first()
 
-        
-        existing = Appointment.query.filter_by(
-            doctor_id=doctor_id,
-            date=date,
-            time=time,
-            status="Pending" 
+
+        existing = Appointment.query.filter(
+            Appointment.doctor_id == doctor_id,
+            Appointment.date == date,
+            Appointment.time == time,
+            Appointment.status.in_(["Booked", "Pending"])
         ).first()
 
         if existing:
@@ -610,8 +602,6 @@ def cancel_appointment(appointment_id):
         return redirect(url_for('login'))
 
     appt = Appointment.query.get_or_404(appointment_id)
-    
-    # Verify ownership
     patient = Patient.query.filter_by(user_id=session['user_id']).first()
     if appt.patient_id != patient.id:
         flash("Unauthorized action.", "error")
@@ -630,8 +620,6 @@ def patient_history():
 
     patient = Patient.query.filter_by(user_id=session['user_id']).first()
     history = PatientHistory.query.filter_by(patient_id=patient.id).order_by(PatientHistory.date.desc()).all()
-    
-    # Also fetch past appointments
     past_appointments = (
         db.session.query(Appointment, Doctor, User)
         .join(Doctor, Appointment.doctor_id == Doctor.id)
@@ -668,7 +656,7 @@ def edit_profile():
 def logout():
      session.pop('username', None)
      return redirect(url_for('base'))
-        
+
 
 db.init_app(app)
 
@@ -688,7 +676,6 @@ with app.app_context():
         db.session.add(admin)
         db.session.commit()
 
-    # Seed Departments
     if not Department.query.first():
         depts = [
             Department(name="Cardiology", description="Heart and cardiovascular system"),

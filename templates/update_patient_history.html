@@ -1,11 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Patient History</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/update_patient_history.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navlinks a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .card-header {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-back {
+            font-size: 14px;
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .info-bar {
+            background-color: #e8f6f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1abc9c;
+        }
+
+        .info-bar p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+            /* Ensures padding doesn't affect width */
+        }
+
+        .action-buttons {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .btn-save {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-save:hover {
+            background-color: #27ae60;
+        }
+    </style>
 </head>
+
 <body>
 
     <!-- NAVBAR START -->
@@ -16,9 +132,9 @@
         </div>
     </nav>
     <!-- NAVBAR END -->
-    
+
     <!-- MAIN CONTENT -->
-    <div class="content-container"> 
+    <div class="content-container">
 
         <div class="card">
             <div class="card-header">
@@ -32,8 +148,8 @@
                 <p><strong>Department:</strong> {{ patient_details.department }}</p>
             </div>
 
-            <form action="{{ url_for('update_history', patient_id=patient_details.patient_id) }}" method="POST">
-                
+            <form action="{{ url_for('update_patient_history', patient_id=patient_details.patient_id) }}" method="POST">
+
                 <div class="form-group">
                     <label for="visitType">Visit Type</label>
                     <select id="visitType" name="visitType" required>
@@ -42,30 +158,22 @@
                         <option value="emergency">Emergency</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="testsDone">Tests Done</label>
-                    <input type="text" id="testsDone" name="testsDone" placeholder="e.g., ECG, Blood Test, X-Ray" required>
-                </div>
 
                 <div class="form-group">
                     <label for="diagnosis">Diagnosis</label>
-                    <input type="text" id="diagnosis" name="diagnosis" placeholder="e.g., Acute Myocardial Infarction" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="prescription">Prescription / Remarks</label>
-                    <textarea id="prescription" name="prescription" placeholder="Detailed advice, non-drug prescription, and general remarks."></textarea>
+                    <input type="text" id="diagnosis" name="diagnosis" placeholder="e.g., Acute Myocardial Infarction"
+                        required>
                 </div>
 
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-save">Save History</button>
                 </div>
-            
+
             </form>
         </div>
 
     </div>
 
 </body>
+
 </html>

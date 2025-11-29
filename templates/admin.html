@@ -249,7 +249,6 @@
                         <th>Doctor Name</th>
                         <th>Department</th>
                         <th>Date & Time</th>
-                        <th>History</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -260,7 +259,6 @@
                         <td>Dr. {{ row[1].user.username }}</td>
                         <td>{{ row[1].department_id }}</td>
                         <td>{{ row[0].date }} @ {{ row[0].time }}</td>
-                        <td><button class="btn btn-view">View</button></td>
                     </tr>
                     {% else %}
                     <tr>

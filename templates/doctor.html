@@ -16,14 +16,11 @@
             display: flex;
             flex-direction: column;
             background: #f4f7f6;
-            /* Light gray background */
             overflow: hidden;
         }
 
-        /* Navbar & Footer */
         .navbar {
             background: #2c3e50;
-            /* Dark blue/gray */
             color: white;
             flex-shrink: 0;
             padding: 15px 30px;
@@ -40,7 +37,6 @@
             transition: color 0.2s;
         }
 
-        /* Main Content Container */
         .content-container {
             flex-grow: 1;
             overflow-y: auto;
@@ -49,7 +45,6 @@
             flex-direction: column;
         }
 
-        /* HEADER BAR (Welcome & Logout) */
         .header-bar {
             display: flex;
             justify-content: space-between;
@@ -67,16 +62,13 @@
             margin: 0;
         }
 
-        /* DASHBOARD GRID */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            /* Appointments wider than Patient List/Availability */
             gap: 20px;
             flex-grow: 1;
         }
 
-        /* CARD STYLING */
         .card {
             background: white;
             padding: 25px;
@@ -93,7 +85,6 @@
             font-size: 20px;
         }
 
-        /* APPOINTMENTS TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -125,7 +116,6 @@
             background-color: #ffffff;
         }
 
-        /* PATIENT LIST */
         .patient-item {
             display: flex;
             justify-content: space-between;
@@ -147,7 +137,6 @@
             flex-grow: 1;
         }
 
-        /* BUTTON STYLING (Matching the screenshot colors) */
         .btn {
             padding: 8px 12px;
             border: none;
@@ -164,48 +153,39 @@
             opacity: 0.85;
         }
 
-        /* Specific Button Colors */
         .btn-update {
             background: #3498db;
         }
 
-        /* Blue */
         .btn-complete {
             background: #2ecc71;
         }
 
-        /* Green */
         .btn-cancel {
             background: #e74c3c;
         }
 
-        /* Red */
         .btn-view {
             background: #9b59b6;
         }
 
-        /* Purple/Violet */
         .btn-availability {
             background: #2ecc71;
-            /* Green, as requested */
             width: 100%;
             margin-top: 15px;
             padding: 12px;
             font-size: 16px;
         }
 
-        /* MEDIA QUERIES FOR RESPONSIVENESS */
         @media (max-width: 900px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
-                /* Stack columns on smaller screens */
             }
 
             .content-container {
                 padding: 15px 20px;
             }
 
-            /* Make table columns stack on smaller mobile screens */
             table,
             thead,
             tbody,
@@ -237,7 +217,6 @@
                 color: #34495e;
             }
 
-            /* Fix action button alignment on mobile */
             .action-cell {
                 text-align: left !important;
                 padding-left: 6px !important;
@@ -248,27 +227,21 @@
 
 <body>
 
-    <!-- NAVBAR START -->
     <nav class="navbar">
         <div class="logo" style="font-weight: bold;">HOSPITAL MANAGEMENT SYSTEM</div>
         <div class="navlinks">
             <a href="{{ url_for('logout') }}">Sign Out</a>
         </div>
     </nav>
-    <!-- NAVBAR END -->
 
-    <!-- MAIN CONTENT CONTAINER START -->
     <div class="content-container">
 
-        <!-- HEADER BAR -->
         <div class="header-bar">
             <h1>Welcome {{doctor.username}} </h1>
         </div>
 
-        <!-- DASHBOARD GRID -->
         <div class="dashboard-grid">
 
-            <!-- LEFT COLUMN: UPCOMING APPOINTMENTS -->
             <div class="card" style="grid-column: 1 / 2;">
                 <h2 class="card-header">Upcoming Appointments</h2>
 
@@ -276,6 +249,7 @@
                     <thead>
                         <tr>
                             <th>Sr No.</th>
+                            <th>Date</th>
                             <th style="width: 25%;">Patient Name</th>
                             <th>Patient History</th>
                             <th>Status</th>
@@ -286,12 +260,16 @@
                         {% for appt in today_schedule %}
                         <tr class="{{ loop.cycle('row-odd', 'row-even') }}">
                             <td data-label="Sr No.:">{{ loop.index }}.</td>
+                            <td data-label="Date:">{{ appt.date }}</td>
                             <td data-label="Patient Name:">
                                 {{ appt.patient_name }}
                                 <span style="font-size: 0.8em; color: #7f8c8d;">({{ appt.time }})</span>
                             </td>
                             <td data-label="History:">
-                                <button class="btn btn-view" style="margin: 0;">View</button>
+                                <a href="{{ url_for('view_history', patient_id=appt.patient_id) }}"
+                                    style="text-decoration: none;">
+                                    <button class="btn btn-view" style="margin: 0;">View</button>
+                                </a>
                             </td>
                             <td data-label="Status:">
                                 {% if appt.status == 'Cancelled' %}
@@ -304,9 +282,18 @@
                             </td>
                             <td data-label="Actions:" class="action-cell">
                                 {% if appt.status != 'Cancelled' and appt.status != 'Completed' %}
-                                <button class="btn btn-update">update</button>
-                                <button class="btn btn-complete">mark as complete</button>
-                                <button class="btn btn-cancel">cancel</button>
+                                <a href="{{ url_for('update_patient_history', patient_id=appt.patient_id) }}"
+                                    style="text-decoration: none;">
+                                    <button class="btn btn-update">update</button>
+                                </a>
+                                <a href="{{ url_for('complete_appointment', appointment_id=appt.appointment_id) }}"
+                                    style="text-decoration: none;">
+                                    <button class="btn btn-complete">mark as complete</button>
+                                </a>
+                                <a href="{{ url_for('cancel_appointment_doctor', appointment_id=appt.appointment_id) }}"
+                                    style="text-decoration: none;">
+                                    <button class="btn btn-cancel">cancel</button>
+                                </a>
                                 {% else %}
                                 <span style="color: #aaa;">No actions</span>
                                 {% endif %}
@@ -314,9 +301,9 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5"
+                            <td colspan="6"
                                 style="padding: 20px; text-align: center; color: #777; border-bottom: none;">
-                                You have no upcoming appointments for today.
+                                You have no upcoming appointments.
                             </td>
                         </tr>
                         {% endfor %}
@@ -324,10 +311,8 @@
                 </table>
             </div>
 
-            <!-- RIGHT COLUMN: ASSIGNED PATIENTS & AVAILABILITY -->
             <div style="grid-column: 2 / 3;">
 
-                <!-- Assigned Patients List -->
                 <div class="card" style="margin-bottom: 20px;">
                     <h2 class="card-header">Assigned Patients</h2>
 
@@ -341,7 +326,6 @@
                     {% endfor %}
                 </div>
 
-                <!-- Provide Availability Button -->
                 <div class="card">
                     <p style="text-align: center; color: #7f8c8d;">
                         Update your schedule for patient bookings.
@@ -356,13 +340,10 @@
         </div>
 
     </div>
-    <!-- MAIN CONTENT CONTAINER END -->
 
-    <!-- FOOTER START -->
     <footer class="navbar" style="background: #2c3e50; font-size: 12px; justify-content: center;">
         © 2025 Hospital Management System
     </footer>
-    <!-- FOOTER END -->
 
 </body>
 

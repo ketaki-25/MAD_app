@@ -1,7 +1,6 @@
 from controller.database import db
 from datetime import datetime
 
-
 class User(db.Model):
     __tablename__ = "users"
 
@@ -16,7 +15,6 @@ class User(db.Model):
     age = db.Column(db.Integer)
     gender = db.Column(db.String(10))
 
-    # One-to-one links for role-specific profiles
     doctor_profile = db.relationship(
         "Doctor",
         back_populates="user",
@@ -55,7 +53,6 @@ class Patient(db.Model):
     )
 
     patient_history = db.Column(db.Text)
-
     user = db.relationship("User", back_populates="patient_profile")
 
     appointments = db.relationship(
@@ -93,7 +90,6 @@ class Doctor(db.Model):
     user = db.relationship("User", back_populates="doctor_profile")
     department = db.relationship("Department", back_populates="doctors")
 
-    # Doctor's appointment connections
     appointments = db.relationship(
         "Appointment",
         back_populates="doctor",
@@ -130,18 +126,17 @@ class Appointment(db.Model):
     patient = db.relationship("Patient", back_populates="appointments")
     doctor = db.relationship("Doctor", back_populates="appointments")
 
-class DoctorAvailability(db.Model):
+class Doctor_availability(db.Model):
     __tablename__ = "doctor_availability"
 
     id = db.Column(db.Integer, primary_key=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey("doctors.id"), nullable=False)
 
-    date = db.Column(db.String(50), nullable=False)        # '2025-02-12'
-    time_slot = db.Column(db.String(50), nullable=False)   # 'morning', 'afternoon'
+    date = db.Column(db.String(50), nullable=False)
+    time_slot = db.Column(db.String(50), nullable=False)
     is_available = db.Column(db.Boolean, default=False)
 
     doctor = db.relationship("Doctor", backref="availability")
-
 
 class PatientHistory(db.Model):
     __tablename__ = "patient_history"
@@ -150,8 +145,8 @@ class PatientHistory(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"), nullable=False)
     visit_type = db.Column(db.String(100))
     diagnosis = db.Column(db.Text)
-    created_by = db.Column(db.Integer, db.ForeignKey("users.id")) # Doctor's User ID
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
+    date = db.Column(db.DateTime, default=datetime)
 
     patient = db.relationship("Patient", back_populates="history_records")
 
