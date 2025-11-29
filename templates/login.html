@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="login-container" style="
+    /* Positioning the form on the right half of the banner */
+    position: absolute;
+    right: 15%; /* Keep consistent with registration page position */
+    top: 50%;
+    transform: translateY(-50%); /* Centers the form vertically */
+
+    /* Styling the form card - same as registration page */
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    width: 380px; /* Consistent width */
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+">
+
+    <h2 style="
+        font-size: 24px;
+        color: #2c3e50;
+        margin-bottom: 25px;
+        border-left: 5px solid #3498db; 
+        padding-left: 10px;
+    ">
+        Sign In
+    </h2>
+
+{% if error_message %}
+{{ error_message }}
+{% endif %}
+
+    <form method="POST" action="/login">
+        
+        <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #555;">Username</label>
+        <input type="text" name="username" placeholder="Enter username" required style="width:100%; padding:10px; margin-bottom:15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+
+        <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #555;">Password</label>
+        <input type="password" name="password" placeholder="Enter your password" required style="width:100%; padding:10px; margin-bottom:30px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+
+        <button type="submit" style="
+            width:100%;
+            padding:12px;
+            /* Gradient background like your registration page */
+            background: linear-gradient(to right, #6a11cb, #2575fc); 
+            color:white;
+            font-size: 16px;
+            font-weight: bold;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            transition: background 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        ">
+            Signin
+        </button>
+        
+        <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+            Don't have an account? <a href="{{ url_for('registration') }}" style="color: #3498db; text-decoration: none; font-weight: bold;">Register here</a>
+        </p>
+    </form>
+
+</div>
+
+{% endblock %} login.html 

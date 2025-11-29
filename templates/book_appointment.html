@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Book Appointment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        .slot-label {
+            display: block;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .slot-label:hover {
+            background: #f0f8ff;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: #27ae60;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <a href="{{ url_for('patient') }}" class="back-link">← Back to Dashboard</a>
+        <h1>Book Appointment with Dr. {{ doctor_user.username }}</h1>
+
+        {% with messages = get_flashed_messages(category_filter=["error"]) %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="error">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <h3>Select a Time Slot:</h3>
+            {% for slot in availabilities %}
+            <label class="slot-label">
+                <input type="radio" name="date_time" value="{{ slot.date }}_{{ slot.time_slot }}" required>
+                <strong>{{ slot.date }}</strong> - {{ slot.time_slot }}
+            </label>
+            {% else %}
+            <p>No available slots for this doctor.</p>
+            {% endfor %}
+
+            {% if availabilities %}
+            <button type="submit" class="btn">Confirm Booking</button>
+            {% endif %}
+        </form>
+    </div>
+
+</body>
+
+</html>

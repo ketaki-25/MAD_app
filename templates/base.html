@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+
+    <style>
+        /* Reset & Base Layout */
+        html, body {
+            margin: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            overflow: hidden;
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            background: #2c3e50;
+            padding: 15px 30px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0; /* Don't shrink */
+        }
+
+        .navlinks a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 15px;
+        }
+
+        /* Main Image Wrapper */
+        .page-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Full-screen Banner Image */
+        .banner-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Makes image responsive without distortion */
+        }
+
+        /* Footer */
+        .footer {
+            background: #2c3e50;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <div class="logo">HOSPITAL MANAGEMENT SYSTEM</div>
+
+        <div class="navlinks">
+            {% if not session.get('username') %}
+                <a href="{{ url_for('login') }}">Signin</a>
+                <a href="{{ url_for('registration') }}">Register</a>
+
+            {% elif session.get('role') == 'patient' %}
+                <a href="{{ url_for('patient') }}">Dashboard</a>
+                <a href="{{ url_for('logout') }}">SignOut</a>
+
+            {% elif session.get('role') == 'doctor' %}
+                <a href="{{ url_for('doctor') }}">Dashboard</a>
+                <a href="{{ url_for('logout') }}">SignOut</a>
+
+            {% elif session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin') }}">Admin Panel</a>
+                <a href="{{ url_for('logout') }}">SignOut</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-wrapper">
+        <img src="{{ url_for('static', filename='Images/Hospital.png') }}" 
+             alt="Hospital Banner"
+             class="banner-image">
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        © 2025 Hospital Management System | All Rights Reserved
+    </footer>
+
+</body>
+</html>

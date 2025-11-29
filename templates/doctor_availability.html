@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Availability</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            background: #f4f7f6;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navlinks a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            max-width: 900px;
+            margin: 20px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 24px;
+            color: #34495e;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .availability-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background-color: #ddd;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .header-cell,
+        .data-cell {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        .header-cell {
+            background-color: #34495e;
+            color: white;
+            font-weight: bold;
+            padding: 15px 8px;
+        }
+
+        .date-cell {
+            background: #ecf0f1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .slot-checkbox {
+            display: none;
+        }
+
+        .slot-cell {
+            cursor: pointer;
+            background: #e74c3c;
+            color: white;
+            transition: 0.2s;
+            padding: 15px 0;
+        }
+
+        .slot-checkbox:checked+.slot-cell {
+            background: #2ecc71;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-save {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-back {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #2980b9;
+        }
+
+        .btn-back:hover {
+            background: #7f8c8d;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo" style="font-weight:bold;">HOSPITAL MANAGEMENT SYSTEM</div>
+        <div class="navlinks">
+            <a href="{{ url_for('logout') }}">SignOut</a>
+        </div>
+    </nav>
+
+    <div class="content-container">
+        <div class="card">
+
+            <div class="card-header">
+                Set Weekly Availability
+                <a href="{{ url_for('doctor') }}" class="btn btn-back">Back</a>
+            </div>
+
+            <p style="color:#7f8c8d;">
+                Click a time slot to toggle availability (Red = Unavailable, Green = Available)
+            </p>
+
+            <!-- FIXED ACTION -->
+            <form action="{{ url_for('set_availability') }}" method="POST">
+
+                <div class="availability-grid">
+
+                    <div class="header-cell">Date</div>
+                    <div class="header-cell">08:00 - 12:00</div>
+                    <div class="header-cell">12:00 - 16:00</div>
+                    <div class="header-cell">16:00 - 20:00</div>
+                    <div class="header-cell">20:00 - 00:00</div>
+
+                    {% for date in dates %}
+                    <div class="date-cell">{{ date }}</div>
+
+                    {% for slot in [1,2,3,4] %}
+                    <input type="checkbox" id="slot_{{ date }}_{{ slot }}" name="availability"
+                        value="{{ date }}_{{ slot }}" class="slot-checkbox">
+                    <label for="slot_{{ date }}_{{ slot }}" class="slot-cell"></label>
+                    {% endfor %}
+                    {% endfor %}
+
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-save">Save Availability</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

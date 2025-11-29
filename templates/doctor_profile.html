@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. {{ doctor_name }} Profile</title>
+    <style>
+        html, body {
+            height: 100%; margin: 0; padding: 0; 
+            font-family: Arial, sans-serif;
+            display: flex; flex-direction: column;
+            background: #f4f7f6;
+        }
+        .navbar {
+            background: #2c3e50; color: white; flex-shrink: 0;
+            padding: 15px 30px; display: flex; justify-content: space-between;
+            align-items: center; z-index: 20; 
+        }
+        .navlinks a {
+            color: white; text-decoration: none; font-weight: bold; margin-left: 20px;
+        }
+        .content-container {
+            flex-grow: 1; overflow-y: auto; padding: 40px 20px; 
+            max-width: 650px; 
+            width: 100%; margin: 0 auto; 
+            box-sizing: border-box;
+        }
+        .profile-card {
+            background: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .profile-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            background: #bdc3c7; 
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 50px;
+            flex-shrink: 0;
+        }
+        .info-block h1 {
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+            font-size: 26px;
+        }
+        .info-block p {
+            margin: 0 0 3px 0;
+            color: #555;
+            font-size: 15px;
+        }
+        .experience-text {
+            color: #34495e;
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        .about-section {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        .about-section h2 {
+            color: #34495e;
+            font-size: 20px;
+            margin: 0 0 10px 0;
+        }
+        .about-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 25px;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: flex-end; 
+            gap: 15px;
+        }
+        .btn {
+            padding: 10px 25px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+        .btn-check {
+            background: #3498db; 
+        }
+        .btn-check:hover {
+            background: #2980b9;
+        }
+        .btn-back {
+            background: #95a5a6; 
+        }
+        .btn-back:hover {
+            background: #7f8c8d;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo" style="font-weight: bold;">HOSPITAL MANAGEMENT SYSTEM</div>
+        <div class="navlinks">
+            <a href="{{ url_for('logout') }}">SignOut</a>
+        </div>
+    </nav>
+    <div class="content-container"> 
+
+        <div class="profile-card">
+            
+            <div class="profile-header">
+                <div class="avatar">
+                    <i class="fas fa-user-md">&#9766;</i> 
+                </div>
+                <div class="info-block">
+                    <h1>Dr. {{ doctor_name }}</h1> 
+                    <p> MD - {{ specializations }}</p>
+                    <span class="experience-text">20 Years Experience Overall</span>
+                    {% if specialist_years %}
+                        <p style="margin-top: 5px;">10 years as specialist</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h2 style="border-bottom: none; font-size: 18px;">About Dr. {{ doctor_name }}</h2>
+                <p class="about-text">
+                    {{ about_me }}
+                </p>
+            </div>
+            
+            <div class="btn-group">
+                <a href="{{ url_for('doctor_availability', doctor_id=doctor_id) }}" class="btn btn-check">
+                    Check Availability
+                </a>
+                <a href="{{ url_for('view_doctor', department_id=department_id) }}" class="btn btn-back">
+                    Go Back
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+    </body>
+</html>

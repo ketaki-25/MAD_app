@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+    <style>
+        table {
+            width: 90%;
+            margin: 30px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background: #2c3e50;
+            color: white;
+        }
+        h2 { text-align: center; }
+        .missing { color: red; font-weight: bold; }
+        .found { color: green; }
+    </style>
+</head>
+<body>
+
+<h2>Search Results for: {{ query }}</h2>
+
+{% if results %}
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Contact</th>
+        <th>Age</th>
+        <th>Gender</th>
+        
+    </tr>
+
+    {% for user in results %}
+    <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>{{ user.contact if user.contact else '—' }}</td>
+        <td>{{ user.age if user.age else '—' }}</td>
+        <td>{{ user.gender if user.gender else '—' }}</td>
+
+        <td>
+            {% if user.role == "Doctor" %}
+                {% set doc = Doctor.query.filter_by(user_id=user.id).first() %}
+                {% if doc %}
+                    <span class="found">✔ Doctor Profile Found ({{ doc.department }}, {{ doc.specialization }})</span>
+                {% else %}
+                    <span class="missing">❌ Doctor Profile Missing</span>
+                {% endif %}
+            {% elif user.role == "Patient" %}
+                {% set patient = Patient.query.filter_by(user_id=user.id).first() %}
+                {% if patient %}
+                    <span class="found">✔ Patient Profile Found (Age: {{ patient.age }})</span>
+                {% else %}
+                    <span class="missing">❌ Patient Profile Missing</span>
+                {% endif %}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% else %}
+<p style="text-align:center; color:gray; margin-top:20px;">No matching records found.</p>
+{% endif %}
+
+</body>
+</html>

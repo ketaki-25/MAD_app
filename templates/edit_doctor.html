@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Doctor</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            margin: auto;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            margin-top: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Edit Doctor Details</h2>
+
+        <form method="POST">
+
+            <label>Doctor Name</label>
+            <input type="text" name="username" value="{{ doctor.user.username }}" required>
+
+            <label>Contact</label>
+            <input type="text" name="contact" value="{{ doctor.user.contact }}" required>
+
+            <label>Department</label>
+            <select id="department" name="specialization" required>
+                 <option value="" disabled selected>Select a Department</option>
+                 <option value="Cardiology">Cardiology</option>
+                 <option value="Neurology">Neurology</option>
+                 <option value="Oncology">Oncology</option>
+                 <option value="Orthopedics">Orthopedics</option>
+                 <option value="General Medicine">General Medicine</option>
+             </select>
+            <button type="submit">Save Changes</button>
+        </form>
+
+        <a class="back-link" href="{{ url_for('admin') }}"> Back </a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <style>
+        /* GLOBAL STYLES */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            background: #f4f7f6;
+            /* Light gray background */
+            overflow-y: auto;
+        }
+
+        /* Navbar & Footer */
+        .navbar {
+            background: #2c3e50;
+            /* Dark blue/gray */
+            color: white;
+            flex-shrink: 0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .navlinks {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .navlinks a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        /* Main Content Container */
+        .content-container {
+            flex-grow: 1;
+            padding: 20px;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            /* Center the content */
+            box-sizing: border-box;
+        }
+
+        /* HEADER BAR (Welcome & Links) */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .header-bar h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .header-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .header-links a:hover {
+            color: #2980b9;
+        }
+
+        /* CARD STYLING */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            font-size: 20px;
+        }
+
+        /* DEPARTMENT LIST */
+        .department-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+            transition: background-color 0.2s;
+        }
+
+        .department-item:hover {
+            background-color: #f0f8ff;
+        }
+
+        /* APPOINTMENTS TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        thead th {
+            background-color: #34495e;
+            color: white;
+            font-weight: normal;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .row-even {
+            background-color: #f9f9f9;
+        }
+
+        .row-odd {
+            background-color: #ffffff;
+        }
+
+        /* BUTTON STYLING */
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: opacity 0.2s;
+            margin-left: 5px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        /* Specific Button Colors */
+        .btn-view {
+            background: #3498db;
+        }
+
+        /* Blue */
+        .btn-cancel {
+            background: #e74c3c;
+        }
+
+        /* Red */
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo" style="font-weight: bold;">HOSPITAL MANAGEMENT SYSTEM</div>
+        <div class="navlinks">
+            <a href="{{ url_for('logout') }}">SignOut</a>
+        </div>
+    </nav>
+    <div class="content-container">
+
+        <div class="header-bar">
+            <h1>Welcome {{patient.user.username}}</h1>
+            <div class="header-links">
+                <a href="{{ url_for('patient_history') }}">History</a> |
+                <a href="{{ url_for('edit_profile') }}">Edit Profile</a> |
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-header">Departments</h2>
+
+            {% for dept in departments %}
+            <div class="department-item">
+                <span>{{ dept.name }}</span>
+                <a href="{{ url_for('view_doctors', department_id=dept.id) }}" class="btn btn-view">
+                    View Doctors
+                </a>
+            </div>
+            {% endfor %}
+
+            {% if not departments %}
+            <p style="color: #999; text-align: center;">No departments available at this time.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2 class="card-header">Upcoming Appointments</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sr No.</th>
+                        <th>Doctor Name</th>
+                        <th>Dept</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr class="{{ loop.cycle('row-odd', 'row-even') }}">
+                        <td>{{ loop.index }}</td>
+                        <td>Dr. {{ appt.doctor_name }}</td>
+                        <td>{{ appt.department }}</td>
+                        <td>{{ appt.date }}</td>
+                        <td>{{ appt.time }}</td>
+                        <td>{{ appt.status }}</td>
+                        <td style="text-align: right;">
+                            {% if appt.status != 'Cancelled' and appt.status != 'Completed' %}
+                            <a href="{{ url_for('cancel_appointment', appointment_id=appt.id) }}" class="btn btn-cancel"
+                                onclick="return confirm('Are you sure you want to cancel?')">
+                                Cancel
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="padding: 20px; text-align: center; color: #777; border-bottom: none;">
+                            You have no upcoming appointments.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <footer class="navbar" style="background: #2c3e50; font-size: 12px; justify-content: center;">
+        © 2025 Hospital Management System | Patient Portal
+    </footer>
+</body>
+
+</html>

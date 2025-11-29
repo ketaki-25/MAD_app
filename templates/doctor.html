@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard</title>
+    <style>
+        /* GLOBAL STYLES */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            background: #f4f7f6;
+            /* Light gray background */
+            overflow: hidden;
+        }
+
+        /* Navbar & Footer */
+        .navbar {
+            background: #2c3e50;
+            /* Dark blue/gray */
+            color: white;
+            flex-shrink: 0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .navlinks a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        /* Main Content Container */
+        .content-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER BAR (Welcome & Logout) */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .header-bar h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        /* DASHBOARD GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            /* Appointments wider than Patient List/Availability */
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        /* CARD STYLING */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            font-size: 20px;
+        }
+
+        /* APPOINTMENTS TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        thead th {
+            background-color: #34495e;
+            color: white;
+            font-weight: normal;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .row-even {
+            background-color: #f9f9f9;
+        }
+
+        .row-odd {
+            background-color: #ffffff;
+        }
+
+        /* PATIENT LIST */
+        .patient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+            transition: background-color 0.2s;
+        }
+
+        .patient-item:hover {
+            background-color: #e6f7ff;
+        }
+
+        .patient-item span {
+            flex-grow: 1;
+        }
+
+        /* BUTTON STYLING (Matching the screenshot colors) */
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: opacity 0.2s;
+            margin-left: 5px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        /* Specific Button Colors */
+        .btn-update {
+            background: #3498db;
+        }
+
+        /* Blue */
+        .btn-complete {
+            background: #2ecc71;
+        }
+
+        /* Green */
+        .btn-cancel {
+            background: #e74c3c;
+        }
+
+        /* Red */
+        .btn-view {
+            background: #9b59b6;
+        }
+
+        /* Purple/Violet */
+        .btn-availability {
+            background: #2ecc71;
+            /* Green, as requested */
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        /* MEDIA QUERIES FOR RESPONSIVENESS */
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                /* Stack columns on smaller screens */
+            }
+
+            .content-container {
+                padding: 15px 20px;
+            }
+
+            /* Make table columns stack on smaller mobile screens */
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            td {
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: #34495e;
+            }
+
+            /* Fix action button alignment on mobile */
+            .action-cell {
+                text-align: left !important;
+                padding-left: 6px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR START -->
+    <nav class="navbar">
+        <div class="logo" style="font-weight: bold;">HOSPITAL MANAGEMENT SYSTEM</div>
+        <div class="navlinks">
+            <a href="{{ url_for('logout') }}">Sign Out</a>
+        </div>
+    </nav>
+    <!-- NAVBAR END -->
+
+    <!-- MAIN CONTENT CONTAINER START -->
+    <div class="content-container">
+
+        <!-- HEADER BAR -->
+        <div class="header-bar">
+            <h1>Welcome {{doctor.username}} </h1>
+        </div>
+
+        <!-- DASHBOARD GRID -->
+        <div class="dashboard-grid">
+
+            <!-- LEFT COLUMN: UPCOMING APPOINTMENTS -->
+            <div class="card" style="grid-column: 1 / 2;">
+                <h2 class="card-header">Upcoming Appointments</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sr No.</th>
+                            <th style="width: 25%;">Patient Name</th>
+                            <th>Patient History</th>
+                            <th>Status</th>
+                            <th style="width: 35%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in today_schedule %}
+                        <tr class="{{ loop.cycle('row-odd', 'row-even') }}">
+                            <td data-label="Sr No.:">{{ loop.index }}.</td>
+                            <td data-label="Patient Name:">
+                                {{ appt.patient_name }}
+                                <span style="font-size: 0.8em; color: #7f8c8d;">({{ appt.time }})</span>
+                            </td>
+                            <td data-label="History:">
+                                <button class="btn btn-view" style="margin: 0;">View</button>
+                            </td>
+                            <td data-label="Status:">
+                                {% if appt.status == 'Cancelled' %}
+                                <span style="color: red; font-weight: bold;">Cancelled</span>
+                                {% elif appt.status == 'Completed' %}
+                                <span style="color: green; font-weight: bold;">Completed</span>
+                                {% else %}
+                                <span style="color: orange; font-weight: bold;">{{ appt.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Actions:" class="action-cell">
+                                {% if appt.status != 'Cancelled' and appt.status != 'Completed' %}
+                                <button class="btn btn-update">update</button>
+                                <button class="btn btn-complete">mark as complete</button>
+                                <button class="btn btn-cancel">cancel</button>
+                                {% else %}
+                                <span style="color: #aaa;">No actions</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5"
+                                style="padding: 20px; text-align: center; color: #777; border-bottom: none;">
+                                You have no upcoming appointments for today.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- RIGHT COLUMN: ASSIGNED PATIENTS & AVAILABILITY -->
+            <div style="grid-column: 2 / 3;">
+
+                <!-- Assigned Patients List -->
+                <div class="card" style="margin-bottom: 20px;">
+                    <h2 class="card-header">Assigned Patients</h2>
+
+                    {% for patient in assigned_patients %}
+                    <div class="patient-item">
+                        <span>{{ patient.name }}</span>
+                        <button class="btn btn-view" style="background: #3498db;">view</button>
+                    </div>
+                    {% else %}
+                    <p style="color: #999; text-align: center;">No active assigned patients.</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Provide Availability Button -->
+                <div class="card">
+                    <p style="text-align: center; color: #7f8c8d;">
+                        Update your schedule for patient bookings.
+                    </p>
+                    <a href="{{ url_for('doctor_availability') }}">
+                        <button class="btn btn-availability">Provide Availability</button>
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <!-- MAIN CONTENT CONTAINER END -->
+
+    <!-- FOOTER START -->
+    <footer class="navbar" style="background: #2c3e50; font-size: 12px; justify-content: center;">
+        © 2025 Hospital Management System
+    </footer>
+    <!-- FOOTER END -->
+
+</body>
+
+</html>

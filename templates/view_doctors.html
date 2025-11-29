@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Doctors in {{ department.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .doctor-card {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <a href="{{ url_for('patient') }}" class="back-link">← Back to Dashboard</a>
+        <h1>Doctors in {{ department.name }}</h1>
+        <p>{{ department.description }}</p>
+
+        {% for doctor, user in doctors %}
+        <div class="doctor-card">
+            <div>
+                <strong>Dr. {{ user.username }}</strong><br>
+                <span style="color: #666;">{{ doctor.specialization }}</span>
+            </div>
+            <a href="{{ url_for('book_appointment', doctor_id=doctor.id) }}" class="btn">Check Availability</a>
+        </div>
+        {% else %}
+        <p>No doctors found in this department.</p>
+        {% endfor %}
+    </div>
+
+</body>
+
+</html>
