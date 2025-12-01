@@ -84,9 +84,7 @@ class Doctor(db.Model):
 
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=True)
     specialization = db.Column(db.String(120))
-
     blacklisted = db.Column(db.Boolean, default=False)
-
     user = db.relationship("User", back_populates="doctor_profile")
     department = db.relationship("Department", back_populates="doctors")
 
@@ -121,7 +119,6 @@ class Appointment(db.Model):
     status = db.Column(db.String(50), default="Pending")
 
     diagnosis = db.Column(db.Text)
-    prescription = db.Column(db.Text)
 
     patient = db.relationship("Patient", back_populates="appointments")
     doctor = db.relationship("Doctor", back_populates="appointments")
@@ -146,7 +143,7 @@ class PatientHistory(db.Model):
     visit_type = db.Column(db.String(100))
     diagnosis = db.Column(db.Text)
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
-    date = db.Column(db.DateTime, default=datetime)
+    date = db.Column(db.DateTime, default=datetime.utcnow())
 
     patient = db.relationship("Patient", back_populates="history_records")
 

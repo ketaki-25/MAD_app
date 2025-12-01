@@ -313,19 +313,6 @@
 
             <div style="grid-column: 2 / 3;">
 
-                <div class="card" style="margin-bottom: 20px;">
-                    <h2 class="card-header">Assigned Patients</h2>
-
-                    {% for patient in assigned_patients %}
-                    <div class="patient-item">
-                        <span>{{ patient.name }}</span>
-                        <button class="btn btn-view" style="background: #3498db;">view</button>
-                    </div>
-                    {% else %}
-                    <p style="color: #999; text-align: center;">No active assigned patients.</p>
-                    {% endfor %}
-                </div>
-
                 <div class="card">
                     <p style="text-align: center; color: #7f8c8d;">
                         Update your schedule for patient bookings.
